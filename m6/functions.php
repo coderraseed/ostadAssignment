@@ -36,17 +36,6 @@ if ( isset( $_POST['submit'] ) ) {
         $password_err = 'Password is required';
     }
 
-/*     // Validate the profile picture field
-if ( !empty( $_FILES["profile_picture"]["name"] ) ) {
-$profile_pic   = $_FILES["profile_pic"];
-$allowed_types = [ "image/jpeg", "image/png", "image/gif" ];
-if ( !in_array( $profile_pic["type"], $allowed_types ) ) {
-$profile_picture_err = "Invalid file type. Only JPEG, PNG, and GIF files are allowed.";
-}
-} else {
-$profile_picture_err = "Profile picture is required";
-} */
-
     // Validate the profile picture field
     if ( !empty( $_FILES['profile_picture']['name'] ) ) {
         $profile_picture = $_FILES['profile_picture'];
@@ -54,10 +43,21 @@ $profile_picture_err = "Profile picture is required";
         // Check if the file is an image
         if ( strpos( $file_type, 'image' ) !== false ) {
             $file_size = $profile_picture['size'];
-            $max_size  = 9000000; // 9 MB
+            $max_size  = 5000000; // 5 MB
             // Check if the file size is within limits
             if ( $file_size > $max_size ) {
                 $profile_picture_err = 'File size is too large. Maximum file size is 1 MB.';
+            } else {
+                // Generate a unique filename based on the current date and time
+                $filename = date( 'YmdHis' ) . '_' . uniqid() . '.' . pathinfo( $profile_picture['name'], PATHINFO_EXTENSION );
+                // Upload the file to the server
+                $upload_dir  = 'uploads/';
+                $upload_path = $upload_dir . $filename;
+                if ( move_uploaded_file( $profile_picture['tmp_name'], $upload_path ) ) {
+                    // File uploaded successfully
+                } else {
+                    $profile_picture_err = 'Error uploading file';
+                }
             }
         } else {
             $profile_picture_err = 'File type not allowed. Only images are allowed.';
@@ -79,32 +79,24 @@ $profile_picture_err = "Profile picture is required";
     }
 }
 
+
+function save_user_data( $serial, $name, $email, $password, $profile_picture ) {
+    // Open the CSV file for appending
+    $file = fopen( 'users.csv', 'a' );
+
+    // Format the data as a CSV string
+    $data = array( $serial, $name, $email, $password, $profile_picture );
+    fputcsv( $file, $data );
+
+    // Close the file
+    fclose( $file );
+}
+
 //!Saves the profile picture to the server in a directory named "uploads" with a unique filename.
 //?Adds the current date and time to the filename of the profile picture before saving it to the server.
 //!Saves the user's name, email, and profile picture filename to a CSV file named "users.csv".
 //!Starts a new session and sets a cookie with the user's name.
-
-
-function save_user_data( $serial, $name, $email, $password, $profile_picture ) {
-    // Save profile picture to server
-    $target_dir  = "uploads/";
-    $target_file = $target_dir . uniqid() . '_' . basename( $profile_picture["name"] );
-    move_uploaded_file( $profile_picture["tmp_name"], $target_file );
-
-    // Add current date and time to filename
-    $date_time       = date( 'Y-m-d_H:i:s' );
-    $ext             = pathinfo( $target_file, PATHINFO_EXTENSION );
-    $new_target_file = $target_dir . uniqid() . '_' . $date_time . '.' . $ext;
-    rename( $target_file, $new_target_file );
-
-    // Save user data to CSV file
-    $file = fopen( 'users.csv', 'a' );
-    fputcsv( $file, [$serial, $name, $email, $password, $new_target_file] );
-    fclose( $file );
-
     // Start session and set cookie with user's name
     session_start();
     $_SESSION['name'] = $name;
     setcookie( 'name', $name, time() + ( 86400 * 30 ), '/' ); // Cookie expires in 30 days
-}
-

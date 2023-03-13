@@ -39,7 +39,7 @@
                     <th>My Picture</th>
                 </tr>
 
-                //!Create a new HTML page that displays the contents of the "users.csv" file in a table.
+                <!-- //!Create a new HTML page that displays the contents of the "users.csv" file in a table. -->
                 <?php
 					if (($handle = fopen("users.csv", "r")) !== false) {
 					    $row = 1;

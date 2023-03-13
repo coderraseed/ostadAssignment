@@ -21,7 +21,7 @@
 <body class="text-light">
     <div class="container container-width">
         <h2 class="text-center pt-5">Assignment of Module 6</h2>
-        <form method="POST">
+        <form method="POST" action="output.php" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="name">Name:</label>
                 <input type="text" class="form-control" id="name" placeholder="Enter name" name="name"><samp><?php echo $name_err;?></samp>

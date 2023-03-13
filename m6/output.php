@@ -32,36 +32,29 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th>1</th>
-                    <th>Rashed</th>
-                    <th>coderraseed@gmail.com</th>
-                    <th>My Picture</th>
-                </tr>
-
                 <!-- //!Create a new HTML page that displays the contents of the "users.csv" file in a table. -->
                 <?php
-					if (($handle = fopen("users.csv", "r")) !== false) {
-					    $row = 1;
-					    while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-					        if ($row == 1) {
-					            $row++;
-					            continue;
-					        }
-					        echo "<tr>";
-					        for ($i=0; $i < count($data); $i++) {
-					            echo "<td>" . $data[$i] . "</td>";
-					        }
-					        echo "</tr>";
-					    }
-					    fclose($handle);
-					}
-				?>
+                    // read users data from CSV file
+                    $file = fopen('users.csv', 'r');
+
+                    while (($data = fgetcsv($file)) !== false) {
+                        echo '<tr>';
+                        echo '<td>' . $data[0] . '</td>';
+                        echo '<td>' . $data[1] . '</td>';
+                        echo '<td>' . $data[2] . '</td>';
+                        echo '<td><img src="uploads/' . $data[3] . '"></td>';
+                        echo '</tr>';
+                        
+                    }
+
+                    fclose($file);
+                ?>
 
 
 
 
-                
+
+
             </tbody>
         </table>
 

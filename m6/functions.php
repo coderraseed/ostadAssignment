@@ -1,17 +1,16 @@
 <?php
 
 // define variables and initialize with empty values
-$name     = $email     = $password     = $profile_picture     = "";
+$name = $email = $password = $profile_picture = "";
 $name_err = $email_err = $password_err = $profile_picture_err = "";
 
-//!Validates the form inputs (ensure that all fields are filled out and the email is in a valid format).
 // check if form is submitted
-if ( isset( $_POST['submit'] ) ) {
+if (isset($_POST['submit'])) {
     // Validate the name field
-    if ( !empty( $_POST['name'] ) ) {
-        $name = htmlspecialchars( trim( $_POST['name'] ) );
+    if (!empty($_POST['name'])) {
+        $name = htmlspecialchars(trim($_POST['name']));
         // Check if the name contains only letters and whitespace
-        if ( !preg_match( '/^[a-zA-Z ]*$/', $name ) ) {
+        if (!preg_match('/^[a-zA-Z ]*$/', $name)) {
             $name_err = 'Only letters and white space allowed';
         }
     } else {
@@ -19,10 +18,10 @@ if ( isset( $_POST['submit'] ) ) {
     }
 
     // Validate the email field
-    if ( !empty( $_POST['email'] ) ) {
-        $email = htmlspecialchars( trim( $_POST['email'] ) );
+    if (!empty($_POST['email'])) {
+        $email = htmlspecialchars(trim($_POST['email']));
         // Check if the email is valid
-        if ( !filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $email_err = 'Invalid email format';
         }
     } else {
@@ -30,30 +29,31 @@ if ( isset( $_POST['submit'] ) ) {
     }
 
     // Validate the password field
-    if ( !empty( $_POST['password'] ) ) {
-        $password = htmlspecialchars( trim( $_POST['password'] ) );
+    if (!empty($_POST['password'])) {
+        $password = htmlspecialchars(trim($_POST['password']));
+        $pass_word = md5($password);
     } else {
         $password_err = 'Password is required';
     }
 
     // Validate the profile picture field
-    if ( !empty( $_FILES['profile_picture']['name'] ) ) {
+    if (!empty($_FILES['profile_picture']['name'])) {
         $profile_picture = $_FILES['profile_picture'];
-        $file_type       = $profile_picture['type'];
+        $file_type = $profile_picture['type'];
         // Check if the file is an image
-        if ( strpos( $file_type, 'image' ) !== false ) {
+        if (strpos($file_type, 'image') !== false) {
             $file_size = $profile_picture['size'];
-            $max_size  = 5000000; // 5 MB
+            $max_size = 5000000; // 5 MB
             // Check if the file size is within limits
-            if ( $file_size > $max_size ) {
-                $profile_picture_err = 'File size is too large. Maximum file size is 1 MB.';
+            if ($file_size > $max_size) {
+                $profile_picture_err = 'File size is too large. Maximum file size is 5 MB.';
             } else {
                 // Generate a unique filename based on the current date and time
-                $filename = date( 'YmdHis' ) . '_' . uniqid() . '.' . pathinfo( $profile_picture['name'], PATHINFO_EXTENSION );
+                $filename = date('YmdHis') . '_' . uniqid() . '.' . pathinfo($profile_picture['name'], PATHINFO_EXTENSION);
                 // Upload the file to the server
-                $upload_dir  = 'uploads/';
+                $upload_dir = 'uploads/';
                 $upload_path = $upload_dir . $filename;
-                if ( move_uploaded_file( $profile_picture['tmp_name'], $upload_path ) ) {
+                if (move_uploaded_file($profile_picture['tmp_name'], $upload_path)) {
                     // File uploaded successfully
                 } else {
                     $profile_picture_err = 'Error uploading file';
@@ -66,6 +66,7 @@ if ( isset( $_POST['submit'] ) ) {
         $profile_picture_err = 'Profile picture is required';
     }
 
+    // If there are no errors
     // If there are no errors, save user data
     if ( empty( $name_err ) && empty( $email_err ) && empty( $password_err ) && empty( $profile_picture_err ) ) {
         $last_serial = count( file( 'users.csv' ) );
@@ -74,18 +75,18 @@ if ( isset( $_POST['submit'] ) ) {
         $serial = $last_serial + 1;
 
         // Save user data
-        save_user_data( $serial, $name, $email, $password, $profile_picture );
+        save_user_data( $serial, $name, $email, $filename );
         //save_user_data($name, $email, $password, $profile_picture);
+
     }
 }
 
-
-function save_user_data( $serial, $name, $email, $password, $profile_picture ) {
+function save_user_data( $serial, $name, $email, $filename ) {
     // Open the CSV file for appending
     $file = fopen( 'users.csv', 'a' );
 
     // Format the data as a CSV string
-    $data = array( $serial, $name, $email, $password, $profile_picture );
+    $data = array( $serial, $name, $email, $filename );
     fputcsv( $file, $data );
 
     // Close the file
